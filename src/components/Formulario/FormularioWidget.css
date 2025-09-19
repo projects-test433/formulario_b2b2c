@@ -1,0 +1,67 @@
+/* General form styles */
+.formulario-widget {
+  width: 100%;
+  max-width: clamp(420px, 92vw, 720px); 
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 28px);
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  box-sizing: border-box; 
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+input:focus {
+  border-color: #007BFF;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .formulario-widget {
+    padding: 15px;
+  }
+
+  input {
+    font-size: 13px;
+  }
+
+  .btn-submit {
+    font-size: 14px;
+  }
+}
