@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import './FormularioWidget.css';
+import {supabase} from '../supabase/supabaseClient';
 
 const FormularioWidget = () => {
 
@@ -52,20 +53,32 @@ const FormularioWidget = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
 
     if(Object.keys(formErrors).length === 0){
       setIsSubmitted(true);
 
-      setTimeout(() => {
+      try {
+        const {data, error} = await supabase
+        .from('registroCliente')
+        .insert([formData]);
+
+        if(error){
+          throw error;
+        }
+
         setIsSubmitted(false);
         setIsSuccess(true);
-        console.log('Datos del formulario enviados:', formData);
-      }, 1500);
+        console.log('Datos guardados:', data);
+      } catch (error){
+        console.error('Error al guardar los datos:', error);
+        setErrors({submit: error.message});
+        setIsSubmitted(false);
+      }
     } else {
-      setErrors(formErrors);
+      setErrors(formErrors)
     }
   };
 
