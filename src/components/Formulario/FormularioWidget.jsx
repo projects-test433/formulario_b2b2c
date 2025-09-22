@@ -1,9 +1,7 @@
-import React, {useState} from 'react';
-import './FormularioWidget.css';
-import {supabase} from '../supabase/supabaseClient';
+import React, { useState } from 'react';
+import { supabase } from '../supabase/supabaseClient';
 
 const FormularioWidget = () => {
-
   const [formData, setFormData] = useState({
     nombre: '',
     apellidoPaterno: '',
@@ -16,6 +14,7 @@ const FormularioWidget = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,7 +23,7 @@ const FormularioWidget = () => {
       [name]: value
     });
 
-    if(errors[name]){
+    if (errors[name]) {
       setErrors({
         ...errors,
         [name]: ''
@@ -35,20 +34,20 @@ const FormularioWidget = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if(!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
-    if(!formData.apellidoMaterno.trim()) newErrors.apellidoMaterno = 'El apellido materno es obligatorio';
-    if(!formData.apellidoPaterno.trim()) newErrors.apellidoPaterno = 'El apellido paterno es obligatorio';
-    if(!formData.correo.trim()){
+    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+    if (!formData.apellidoMaterno.trim()) newErrors.apellidoMaterno = 'El apellido materno es obligatorio';
+    if (!formData.apellidoPaterno.trim()) newErrors.apellidoPaterno = 'El apellido paterno es obligatorio';
+    if (!formData.correo.trim()) {
       newErrors.correo = 'El correo es obligatorio';
-    } else if(!/\S+@\S+\.\S+/.test(formData.correo)){
+    } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
       newErrors.correo = 'El formato del correo no es válido';
     }
-    if(!formData.numeroContacto.trim()) {
+    if (!formData.numeroContacto.trim()) {
       newErrors.numeroContacto = 'El número de contacto es obligatorio';
-    } else if(!/^\d{10}$/.test(formData.numeroContacto)){
+    } else if (!/^\d{10}$/.test(formData.numeroContacto)) {
       newErrors.numeroContacto = 'El número de contacto debe de tener 10 dígitos';
     }
-    if(!formData.fechaNacimiento) newErrors.fechaNacimiento = 'La Fecha de nacimiento es obligatoria';
+    if (!formData.fechaNacimiento) newErrors.fechaNacimiento = 'La Fecha de nacimiento es obligatoria';
 
     return newErrors;
   };
@@ -57,28 +56,27 @@ const FormularioWidget = () => {
     e.preventDefault();
     const formErrors = validateForm();
 
-    if(Object.keys(formErrors).length === 0){
+    if (Object.keys(formErrors).length === 0) {
       setIsSubmitted(true);
 
       try {
-        const {data, error} = await supabase
-        .from('registroCliente')
-        .insert([formData]);
-
-        if(error){
+        const { data, error } = await supabase
+          .from('registroCliente')
+          .insert([formData]);
+        if (error) {
           throw error;
         }
 
         setIsSubmitted(false);
         setIsSuccess(true);
         console.log('Datos guardados:', data);
-      } catch (error){
+      } catch (error) {
         console.error('Error al guardar los datos:', error);
-        setErrors({submit: error.message});
+        setSubmitError(error.message);
         setIsSubmitted(false);
       }
     } else {
-      setErrors(formErrors)
+      setErrors(formErrors);
     }
   };
 
@@ -93,92 +91,173 @@ const FormularioWidget = () => {
     });
     setErrors({});
     setIsSuccess(false);
+    setSubmitError('');
   };
 
-  if(isSuccess){
+  if (isSuccess) {
     return (
-      <div className="success-message">
-        <h2>¡Formulario enviado con éxito!</h2>
-        <button className="btn-reset" onClick={handleReset}>Enviar otro formulario</button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Formulario enviado!</h2>
+            <p className="text-gray-600 mb-6">Tu información se ha registrado correctamente</p>
+            
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-blue-800 mb-2">Descarga PHONECHECK</h3>
+              <p className="text-blue-600 text-sm">
+                Para continuar con el proceso, descarga la app de PhoneCheck desde tu tienda de aplicaciones
+              </p>
+            </div>
+            
+            <button 
+              onClick={handleReset}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200"
+            >
+              Volver al formulario
+            </button>
+          </div>
+        </div>
       </div>
     );
-  };
+  }
 
   return (
-    <form className="formulario-widget" onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label htmlFor="nombre">Nombre</label>
-        <input 
-          type="text" 
-          id="nombre" 
-          name="nombre" 
-          placeholder="Ingresa tu nombre" 
-          value={formData.nombre} 
-          onChange={handleChange}
-          required />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">u-assist</h1>
+          <h2 className="text-lg text-gray-600">Formulario de Registro</h2>
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="apellidoPaterno">Apellido Paterno</label>
-        <input 
-          type="text" 
-          id="apellidoPaterno" 
-          name="apellidoPaterno" 
-          placeholder="Ingresa tu apellido paterno"
-          value={formData.apellidoPaterno}
-          onChange={handleChange}
-          required />
-      </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {submitError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+              {submitError}
+            </div>
+          )}
 
-      <div className="form-group">
-        <label htmlFor="apellidoMaterno">Apellido Materno</label>
-        <input 
-          type="text" 
-          id="apellidoMaterno" 
-          name="apellidoMaterno" 
-          placeholder="Ingresa tu apellido materno"
-          value={formData.apellidoMaterno}
-          onChange={handleChange}
-          required />
-      </div>
+          <div>
+            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+              Ingresa tu nombre
+            </label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.nombre ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej. Juan"
+            />
+            {errors.nombre && <span className="text-red-500 text-xs mt-1 block">{errors.nombre}</span>}
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="correo">Correo Electrónico</label>
-        <input 
-          type="email" 
-          id="correo" 
-          name="correo" 
-          placeholder="Ingresa tu correo electrónico"
-          value={formData.correo}
-          onChange={handleChange}
-          required />
-      </div>
+          <div>
+            <label htmlFor="apellidoPaterno" className="block text-sm font-medium text-gray-700 mb-1">
+              Ingresa tu apellido paterno
+            </label>
+            <input
+              type="text"
+              id="apellidoPaterno"
+              name="apellidoPaterno"
+              value={formData.apellidoPaterno}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.apellidoPaterno ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej. Pérez"
+            />
+            {errors.apellidoPaterno && <span className="text-red-500 text-xs mt-1 block">{errors.apellidoPaterno}</span>}
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="numeroContacto">Número de Contacto</label>
-        <input 
-          type="tel" 
-          id="numeroContacto" 
-          name="numeroContacto" 
-          placeholder="Ingresa tu número de contacto"
-          value={formData.numeroContacto}
-          onChange={handleChange}
-          required />
-      </div>
+          <div>
+            <label htmlFor="apellidoMaterno" className="block text-sm font-medium text-gray-700 mb-1">
+              Ingresa tu apellido materno
+            </label>
+            <input
+              type="text"
+              id="apellidoMaterno"
+              name="apellidoMaterno"
+              value={formData.apellidoMaterno}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.apellidoMaterno ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej. López"
+            />
+            {errors.apellidoMaterno && <span className="text-red-500 text-xs mt-1 block">{errors.apellidoMaterno}</span>}
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="fechaNacimiento">Fecha de Nacimiento</label>
-        <input 
-          type="date" 
-          id="fechaNacimiento" 
-          name="fechaNacimiento"
-          value={formData.fechaNacimiento}
-          onChange={handleChange}
-          required />
-      </div>
+          <div>
+            <label htmlFor="correo" className="block text-sm font-medium text-gray-700 mb-1">
+              Ingresa tu correo electrónico
+            </label>
+            <input
+              type="email"
+              id="correo"
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.correo ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej. juan@ejemplo.com"
+            />
+            {errors.correo && <span className="text-red-500 text-xs mt-1 block">{errors.correo}</span>}
+          </div>
 
-      <button type="submit" className="btn-submit" disabled={isSubmitted}>Enviar</button>
-    </form>
+          <div>
+            <label htmlFor="numeroContacto" className="block text-sm font-medium text-gray-700 mb-1">
+              Ingresa tu número de contacto
+            </label>
+            <input
+              type="tel"
+              id="numeroContacto"
+              name="numeroContacto"
+              value={formData.numeroContacto}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.numeroContacto ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej. 5512345678"
+            />
+            {errors.numeroContacto && <span className="text-red-500 text-xs mt-1 block">{errors.numeroContacto}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="fechaNacimiento" className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha de nacimiento
+            </label>
+            <input
+              type="date"
+              id="fechaNacimiento"
+              name="fechaNacimiento"
+              value={formData.fechaNacimiento}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.fechaNacimiento ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.fechaNacimiento && <span className="text-red-500 text-xs mt-1 block">{errors.fechaNacimiento}</span>}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitted}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 disabled:opacity-50"
+          >
+            {isSubmitted ? 'Enviando...' : 'Enviar'}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 
