@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase/supabaseClient';
+import logo from '../../assets/logo_UASSIST.png';
+import appLogo from '../../assets/appLogo.png';
+import playLogo from '../../assets/playLogo.png';
 
 const FormularioWidget = () => {
   const [formData, setFormData] = useState({
@@ -46,6 +49,8 @@ const FormularioWidget = () => {
       newErrors.numeroContacto = 'El número de contacto es obligatorio';
     } else if (!/^\d{10}$/.test(formData.numeroContacto)) {
       newErrors.numeroContacto = 'El número de contacto debe de tener 10 dígitos';
+    } else if(!/^\d+$/.test(formData.numeroContacto)) {
+      newErrors.numeroContacto = 'solo se permiten números'
     }
     if (!formData.fechaNacimiento) newErrors.fechaNacimiento = 'La Fecha de nacimiento es obligatoria';
 
@@ -110,8 +115,16 @@ const FormularioWidget = () => {
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <h3 className="font-semibold text-blue-800 mb-2">Descarga PHONECHECK</h3>
               <p className="text-blue-600 text-sm">
-                Para continuar con el proceso, descarga la app de PhoneCheck desde tu tienda de aplicaciones
+                Para continuar con el proceso, descarga la app desde tu tienda de aplicaciones
               </p>
+              <div className='flex flex-col gap-2 p-8 sm:flex-col sm:items-center sm:gap-6'>
+                <a href="https://apps.apple.com/mx/app/phonecheck/id1446390777?platform=iphone" target='blank'>
+                  <img src={appLogo} alt="appLogo" className='w-3xs'/>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.phonecheck.phonecheckconsumer&pcampaignid=web_share" target='blank'>
+                  <img src={playLogo} alt="playLogo" className='w-3xs'/>
+                </a>
+              </div>
             </div>
             
             <button 
@@ -129,8 +142,8 @@ const FormularioWidget = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">u-assist</h1>
+        <div className="flex flex-col gap-3 p-10 sm:flex-col sm:items-center">
+          <img src={logo} alt='logo' className='w-3xs'></img>
           <h2 className="text-lg text-gray-600">Formulario de Registro</h2>
         </div>
 
@@ -223,10 +236,18 @@ const FormularioWidget = () => {
               name="numeroContacto"
               value={formData.numeroContacto}
               onChange={handleChange}
+              onKeyUp={(e) => {
+                if(!/[0-9]/.test(e.key)){
+                  e.preventDefault();
+                }
+              }}
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.numeroContacto ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="Ej. 5512345678"
+              maxLength='10'
+              pattern="[0-9]*"
+              inputMode='numeric'
             />
             {errors.numeroContacto && <span className="text-red-500 text-xs mt-1 block">{errors.numeroContacto}</span>}
           </div>
