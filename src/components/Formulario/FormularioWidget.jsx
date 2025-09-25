@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase/supabaseClient';
+import { sendConfirmationEmail } from '../../services/emailService';
 import logo from '../../assets/logo_UASSIST.png';
 import appLogo from '../../assets/appLogo.png';
 import playLogo from '../../assets/playLogo.png';
@@ -72,6 +73,11 @@ const FormularioWidget = () => {
           throw error;
         }
 
+        const emailResult = await sendConfirmationEmail(formData);
+        if(!emailResult.success){
+          console.warn('Registro guardado. No se envío correo:', emailResult.error);
+        }
+
         setIsSubmitted(false);
         setIsSuccess(true);
         console.log('Datos guardados:', data);
@@ -115,7 +121,8 @@ const FormularioWidget = () => {
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <h3 className="font-semibold text-blue-800 mb-2">Descarga PHONECHECK</h3>
               <p className="text-blue-600 text-sm">
-                Para continuar con el proceso, descarga la app desde tu tienda de aplicaciones
+                Para continuar con el proceso, descarga la app desde tu tienda de aplicaciones e 
+                ingresa el código que enviamos a tu correo.
               </p>
               <div className='flex flex-col gap-2 p-8 sm:flex-col sm:items-center sm:gap-6'>
                 <a href="https://apps.apple.com/mx/app/phonecheck/id1446390777?platform=iphone" target='blank'>
@@ -126,7 +133,6 @@ const FormularioWidget = () => {
                 </a>
               </div>
             </div>
-            
             <button 
               onClick={handleReset}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200"
