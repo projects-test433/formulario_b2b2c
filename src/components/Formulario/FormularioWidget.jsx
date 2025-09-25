@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabase/supabaseClient';
 import { sendConfirmationEmail } from '../../services/emailService';
+import { db } from '../../firebase/config';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import logo from '../../assets/logo_UASSIST.png';
 import appLogo from '../../assets/appLogo.png';
 import playLogo from '../../assets/playLogo.png';
@@ -65,14 +66,23 @@ const FormularioWidget = () => {
     if (Object.keys(formErrors).length === 0) {
       setIsSubmitted(true);
 
-      try {
-        const { data, error } = await supabase
-          .from('registroCliente')
-          .insert([formData]);
-        if (error) {
-          throw error;
-        }
 
+
+      try {
+        //guardado en firestore
+        const docRef = await addDoc(collection(db, 'registrosClientes'), {
+          nombre: formData.nombre,
+          apellidoPaterno: formData.apellidoPaterno,
+          apellidoMaterno: formData.apellidoMaterno,
+          correo: formData.correo.toLocaleLowerCase(),
+          numeroContacto: formData.numeroContacto,
+          fechaNacimiento: formData.fechaNacimiento,
+          fechaRegistro: serverTimestamp()
+        });
+
+        console.log('Registro en Firestore con ID:', docRef.id);
+
+        //envío de correo
         const emailResult = await sendConfirmationEmail(formData);
         if(!emailResult.success){
           console.warn('Registro guardado. No se envío correo:', emailResult.error);
@@ -80,7 +90,6 @@ const FormularioWidget = () => {
 
         setIsSubmitted(false);
         setIsSuccess(true);
-        console.log('Datos guardados:', data);
       } catch (error) {
         console.error('Error al guardar los datos:', error);
         setSubmitError(error.message);
